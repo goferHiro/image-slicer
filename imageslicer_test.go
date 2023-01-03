@@ -110,6 +110,12 @@ func TestSlice(t *testing.T) {
 
 	if err := imageslicer.CheckSlice(tiles, grid); err != nil {
 		t.Errorf("[slice] failed for img-%d due to %s", imgID, err)
+		return
+	}
+
+	if err := ValidateSlices(img, tiles, grid); err != nil {
+		t.Errorf("[slice] %v", err)
+		return
 	}
 
 }
@@ -139,7 +145,7 @@ func FuzzSlice(f *testing.F) {
 			t.SkipNow()
 		}
 
-		grid := [2]uint{rows, column}
+		grid := imageslicer.Grid{rows, column}
 
 		tiles := imageslicer.Slice(img, grid)
 
@@ -288,9 +294,9 @@ var procureImages = func() (imgs []image.Image) {
 	return
 }
 
-var procureGrids = func() (grids [][2]uint) {
+var procureGrids = func() (grids []imageslicer.Grid) {
 
-	grids = [][2]uint{
+	grids = []imageslicer.Grid{
 		//{205, 164},
 		{50, 50},
 		//{1, 0},
@@ -328,6 +334,78 @@ func lsDir(dirPath string) (files []string, err error) {
 		} else {
 			files = append(files, path_)
 		}
+	}
+
+	return
+}
+
+// validate all the slices with
+func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Grid) (err error) {
+
+	joinedImg, err := imageslicer.Join(tiles, grid)
+
+	if err != nil {
+		return fmt.Errorf("[ValidateSlice] %s", err)
+	}
+	shapeI := srcImg.Bounds()
+	shapeJ := joinedImg.Bounds()
+
+	if shapeI != shapeJ {
+		log.Println("[SHAPE] pixels lost after split")
+	}
+	rand.Seed(time.Now().UnixNano())
+
+	testCoordinates := [][2]int{
+		{shapeI.Min.X, shapeI.Min.Y}, //has to match
+	}
+	maxY := shapeJ.Max.Y
+	minY := shapeI.Min.Y
+
+	maxX := shapeJ.Max.X
+	minX := shapeI.Min.X
+
+	if testing.Short() {
+		for i := 0; i < (maxY + maxX); i++ {
+			randY := rand.Intn(maxY-minY+1) + minY
+			randX := rand.Intn(maxX-minX+1) + minX
+
+			testCoordinates = append(testCoordinates, [2]int{randX, randY})
+		}
+	} else {
+		for x := minX; x < maxX; x++ {
+			for y := 0; y < maxY; y++ {
+				testCoordinates = append(testCoordinates, [2]int{x, y})
+				log.Println(testCoordinates)
+			}
+		}
+
+	}
+	/*
+		testCoords := make(chan [2]int,1)
+
+		testCoords <- [2]int{shapeI.Min.X, shapeI.Min.Y}*/
+
+	var compareCoords = func(coord [2]int) (err error) {
+		x := coord[0]
+		y := coord[1]
+
+		colorI := srcImg.At(x, y)
+		colorJ := joinedImg.At(x, y)
+
+		if compareColor(colorI, colorJ) {
+		} else {
+			err = fmt.Errorf("[compareColor] (x,y)-(%v,%v)", x, y)
+			return
+		}
+		return
+	}
+
+	for _, coord := range testCoordinates {
+		err = compareCoords(coord)
+		if err != nil {
+			return
+		}
+
 	}
 
 	return
