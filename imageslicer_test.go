@@ -386,10 +386,13 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 
 	var produceCoords = func() {
 
+		log.Println("[produceCoord] start")
+		defer log.Println("[produceCoord] ended")
+
 		defer close(coords)
 
 		if testing.Short() {
-			for i := 0; i < (maxY + maxX); i++ {
+			for i := 0; i < 5000; i++ {
 
 				if err != nil {
 					return
@@ -411,6 +414,7 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 					}
 
 					coord := [2]int{x, y}
+
 					coords <- coord
 
 				}
@@ -423,9 +427,15 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 		//errChan := make(chan error)
 		var errMutex sync.Mutex
 
-		errCtx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
+		errCtx, cancel := context.WithTimeout(context.Background(), time.Minute*10) //FIXME don't context timeout
+
+		log.Println("[consumeCord] started")
+
+		var noOfCoordsTested int
 
 		for coord := range coords {
+
+			noOfCoordsTested += 1
 
 			wg.Add(1)
 			go func(coord [2]int) {
@@ -434,6 +444,7 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 				select {
 				case <-errCtx.Done():
 					//don't compare
+					log.Println("[consumeCord] ended prematurely")
 					return
 				default:
 					err1 := compareCoords(coord)
@@ -448,6 +459,8 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 		}
 
 		wg.Wait()
+
+		log.Printf("[consumeCord] tested %d", noOfCoordsTested)
 
 		/*	close(errChan)
 
