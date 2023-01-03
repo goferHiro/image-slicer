@@ -356,38 +356,6 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 	}
 	rand.Seed(time.Now().UnixNano())
 
-	testCoordinates := [][2]int{
-		{shapeI.Min.X, shapeI.Min.Y}, //has to match
-	}
-
-	/*
-		testCoords := make(chan [2]int,1)
-
-		testCoords <- [2]int{shapeI.Min.X, shapeI.Min.Y}*/
-
-	maxY := shapeJ.Max.Y
-	minY := shapeI.Min.Y
-
-	maxX := shapeJ.Max.X
-	minX := shapeI.Min.X
-
-	if testing.Short() {
-		for i := 0; i < (maxY + maxX); i++ {
-			x := rand.Intn(maxY-minY+1) + minY
-			y := rand.Intn(maxX-minX+1) + minX
-			coord := [2]int{x, y}
-			testCoordinates = append(testCoordinates, coord)
-		}
-	} else {
-		for x := minX; x < maxX; x++ {
-			for y := 0; y < maxY; y++ {
-				coord := [2]int{x, y}
-				testCoordinates = append(testCoordinates, coord)
-			}
-		}
-
-	}
-
 	var compareCoords = func(coord [2]int) (err error) {
 		x := coord[0]
 		y := coord[1]
@@ -403,42 +371,96 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 		return
 	}
 
-	var wg sync.WaitGroup
-	//errChan := make(chan error)
-	var errMutex sync.Mutex
+	/*
+		testCoords := make(chan [2]int,1)
 
-	errCtx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
+		testCoords <- [2]int{shapeI.Min.X, shapeI.Min.Y}*/
 
-	for _, coord := range testCoordinates {
+	maxY := shapeJ.Max.Y
+	minY := shapeI.Min.Y
 
-		wg.Add(1)
-		go func(coord [2]int) {
-			defer wg.Done()
+	maxX := shapeJ.Max.X
+	minX := shapeI.Min.X
 
-			select {
-			case <-errCtx.Done():
-				//don't compare
-				return
-			default:
-				err1 := compareCoords(coord)
-				if err1 != nil {
-					cancel()
-					errMutex.Lock()
-					err = err1
-					errMutex.Unlock() //ideally not supposed to unlock
+	coords := make(chan [2]int, 10)
+
+	var produceCoords = func() {
+
+		defer close(coords)
+
+		if testing.Short() {
+			for i := 0; i < (maxY + maxX); i++ {
+
+				if err != nil {
+					return
+				}
+
+				x := rand.Intn(maxY-minY+1) + minY
+				y := rand.Intn(maxX-minX+1) + minX
+				coord := [2]int{x, y}
+
+				coords <- coord
+
+			}
+		} else {
+			for x := minX; x < maxX; x++ {
+				for y := 0; y < maxY; y++ {
+
+					if err != nil {
+						return
+					}
+
+					coord := [2]int{x, y}
+					coords <- coord
+
 				}
 			}
-		}(coord)
+		}
 	}
 
-	wg.Wait()
+	var consumeCoords = func() {
+		var wg sync.WaitGroup
+		//errChan := make(chan error)
+		var errMutex sync.Mutex
 
-	/*	close(errChan)
+		errCtx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
 
-		for err1 := range errChan {
-			err = err1 //combine errors
-			//break
+		for coord := range coords {
+
+			wg.Add(1)
+			go func(coord [2]int) {
+				defer wg.Done()
+
+				select {
+				case <-errCtx.Done():
+					//don't compare
+					return
+				default:
+					err1 := compareCoords(coord)
+					if err1 != nil {
+						cancel()
+						errMutex.Lock()
+						err = err1
+						errMutex.Unlock()
+					}
+				}
+			}(coord)
 		}
-	*/
+
+		wg.Wait()
+
+		/*	close(errChan)
+
+			for err1 := range errChan {
+				err = err1 //combine errors
+				//break
+			}
+		*/
+	}
+
+	go produceCoords()
+
+	consumeCoords()
+
 	return
 }
