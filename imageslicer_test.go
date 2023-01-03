@@ -64,8 +64,10 @@ func testSlice(t *testing.T, img image.Image, grid [2]uint) {
 func FuzzSlice(f *testing.F) {
 
 	func() { //generate corpus
-		for i := 0; i < 10; i++ { //TODO add more
+		for i := 0; i < 100; i++ { //TODO add more
 			randImgID := rand.Intn(len(images))
+			randNo := rand.Intn(250)
+			f.Add(uint(randImgID), randNo, randNo)
 			for _, grid := range grids {
 				f.Add(uint(randImgID), grid[0], grid[1])
 			}
