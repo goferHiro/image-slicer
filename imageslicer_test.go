@@ -1,6 +1,7 @@
 package imageslicer_test
 
 import (
+	"context"
 	"fmt"
 	imageslicer "github.com/goferHiro/image-slicer"
 	"image"
@@ -379,6 +380,7 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 		}
 
 	}
+
 	/*
 		testCoords := make(chan [2]int,1)
 
@@ -399,12 +401,38 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 		return
 	}
 
-	for _, coord := range testCoordinates {
-		err = compareCoords(coord)
-		if err != nil {
-			return
-		}
+	var wg sync.WaitGroup
+	errChan := make(chan error)
+	errCtx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
 
+	for _, coord := range testCoordinates {
+
+		wg.Add(1)
+		go func(coord [2]int) {
+			defer wg.Done()
+
+			select {
+			case <-errCtx.Done():
+				return
+			}
+			err1 := compareCoords(coord)
+			if err1 != nil {
+				cancel()
+				go func() {
+					errChan <- err1
+				}()
+			}
+
+		}(coord)
+	}
+
+	wg.Wait()
+
+	close(errChan)
+
+	for err1 := range errChan {
+		err = err1 //combine errors
+		//break
 	}
 
 	return
