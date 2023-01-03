@@ -30,9 +30,10 @@ func init() {
 
 }
 
-func TestSlices(t *testing.T) {
+func TestSlice(t *testing.T) {
 
 	if testing.Short() {
+		testSlice(t, img, grid)
 		return
 	}
 
@@ -42,10 +43,6 @@ func TestSlices(t *testing.T) {
 		})
 	}
 
-}
-
-func TestSlice(t *testing.T) {
-	testSlice(t, img, grid)
 }
 
 func testSlice(t *testing.T, img image.Image, grid [2]uint) {
@@ -210,7 +207,7 @@ var procureImages = func() (imgs []image.Image) {
 					log.Println("err", err)
 					log.Fatalf("failed to retreive image-%s\n", imgFile)
 				}
-				//log.Println("imgFile", imgFile)
+				//t.Logf("imgFile", imgFile)
 				mw.Lock()
 				defer mw.Unlock()
 
@@ -310,8 +307,8 @@ func validateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid 
 		maxX := shapeJ.Max.X
 		minX := shapeI.Min.X
 
-		log.Println("[produceCoord] start")
-		defer log.Println("[produceCoord] ended")
+		t.Logf("[produceCoord] start")
+		defer t.Logf("[produceCoord] ended")
 
 		defer close(coords)
 
@@ -355,7 +352,7 @@ func validateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid 
 
 		errCtx, cancel := context.WithTimeout(context.Background(), time.Minute*10) //FIXME don't context timeout
 
-		log.Println("[consumeCord] started")
+		t.Logf("[consumeCord] started")
 
 		var noOfCoordsTested int
 
@@ -370,7 +367,7 @@ func validateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid 
 				select {
 				case <-errCtx.Done():
 					//don't compare
-					log.Println("[consumeCord] ended prematurely")
+					t.Logf("[consumeCord] ended prematurely")
 					return
 				default:
 					err1 := compareCoords(coord)
