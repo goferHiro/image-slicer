@@ -146,7 +146,7 @@ if img == nil {
 log.Fatalln("invalid image url or image format not supported!")
 }
 
-grid := [2]uint{2, 2} //rows,columns
+grid := imageslicer.Grid{2, 2} //rows,columns
 
 tiles := imageslicer.Slice(img, grid)
 
