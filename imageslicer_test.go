@@ -91,6 +91,11 @@ func FuzzSlice(f *testing.F) {
 			}
 
 			f.Add(uint(randImgID), randNo, randNo)
+
+			if testing.Short() {
+				break
+			}
+
 		}
 	}()
 
