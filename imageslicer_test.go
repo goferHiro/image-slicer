@@ -63,12 +63,24 @@ func testSlice(t *testing.T, img image.Image, grid [2]uint) {
 
 func FuzzSlice(f *testing.F) {
 
+	var invalidGrid = func(rows, cols int) (invalid bool) {
+		invalid = rows == 0 || cols == 0
+
+		return
+	}
+
 	func() { //generate corpus
 		rand.Seed(1000)
 
 		for i := 0; i < 100; i++ { //TODO add more
 			randImgID := rand.Intn(len(images))
 			randNo := rand.Intn(250)
+
+			if invalidGrid(randNo, randNo) {
+				f.Logf("[fuzzSlice] generated invalid grid-(%d,%d)", randNo, randNo)
+				continue
+			}
+
 			f.Add(uint(randImgID), randNo, randNo)
 			for _, grid := range grids {
 				f.Add(uint(randImgID), uint(grid[0]), uint(grid[1]))
