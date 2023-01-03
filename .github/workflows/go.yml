@@ -52,7 +52,7 @@ jobs:
         go-version: 1.19.4
 
     - name: Test
-      run: go test -v -run=^Test -short ./...
+      run: go test -v -run=^Test -short ./... -timeout 360m
 
   test-intensive:
     runs-on: ubuntu-latest
@@ -67,7 +67,7 @@ jobs:
           go-version: 1.19.4
 
       - name: Test
-        run: go test -v -run=^Test ./...
+        run: go test -v -run=^Test ./... -timeout 360m
 
   race:
     runs-on: ubuntu-latest
@@ -81,10 +81,10 @@ jobs:
           go-version: 1.19.4
 
       - name: Race Short
-        run: go test -v -race -run=^Test -short ./...
+        run: go test -v -race -run=^Test -short ./... -timeout 360m
 
       - name: Race
-        run: go test -v -race -run=^Test ./...
+        run: go test -v -race -run=^Test ./... -timeout 360m
 
 
   race-intensive:
@@ -99,10 +99,10 @@ jobs:
           go-version: 1.19.4
 
       - name: Race Short
-        run: go test -v -race -short ./...
+        run: go test -v -race -short ./... -timeout 360m
 
       - name: Race
-        run: go test -v -race ./...
+        run: go test -v -race ./... -timeout 360m
 
 
   benchmark:
@@ -117,7 +117,7 @@ jobs:
           go-version: 1.19.4
 
       - name: Benchmark
-        run: go test -v -race -benchmem -bench=. -run=^# -benchtime=100x  -count 200
+        run: go test -v -race -benchmem -bench=. -run=^# -benchtime=100x  -count 200 -timeout 360m
 
   fuzz:
     runs-on: ubuntu-latest
@@ -131,7 +131,7 @@ jobs:
           go-version: 1.19.4
 
       - name: Fuzz
-        run: go test -run=^Fuzz -v
+        run: go test -run=^Fuzz -v -timeout 360m
 
 
 

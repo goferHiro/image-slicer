@@ -37,6 +37,7 @@ func init() {
 func TestSlice(t *testing.T) {
 
 	if testing.Short() {
+		grid = [2]uint{203, 203}
 		t.Logf("TESTSLICES-%d_[%v]", imgID, grid)
 		testSlice(t, img, grid)
 		return
