@@ -359,6 +359,12 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 	testCoordinates := [][2]int{
 		{shapeI.Min.X, shapeI.Min.Y}, //has to match
 	}
+
+	/*
+		testCoords := make(chan [2]int,1)
+
+		testCoords <- [2]int{shapeI.Min.X, shapeI.Min.Y}*/
+
 	maxY := shapeJ.Max.Y
 	minY := shapeI.Min.Y
 
@@ -367,24 +373,20 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 
 	if testing.Short() {
 		for i := 0; i < (maxY + maxX); i++ {
-			randY := rand.Intn(maxY-minY+1) + minY
-			randX := rand.Intn(maxX-minX+1) + minX
-
-			testCoordinates = append(testCoordinates, [2]int{randX, randY})
+			x := rand.Intn(maxY-minY+1) + minY
+			y := rand.Intn(maxX-minX+1) + minX
+			coord := [2]int{x, y}
+			testCoordinates = append(testCoordinates, coord)
 		}
 	} else {
 		for x := minX; x < maxX; x++ {
 			for y := 0; y < maxY; y++ {
-				testCoordinates = append(testCoordinates, [2]int{x, y})
+				coord := [2]int{x, y}
+				testCoordinates = append(testCoordinates, coord)
 			}
 		}
 
 	}
-
-	/*
-		testCoords := make(chan [2]int,1)
-
-		testCoords <- [2]int{shapeI.Min.X, shapeI.Min.Y}*/
 
 	var compareCoords = func(coord [2]int) (err error) {
 		x := coord[0]
@@ -402,7 +404,9 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 	}
 
 	var wg sync.WaitGroup
-	errChan := make(chan error)
+	//errChan := make(chan error)
+	var errMutex sync.Mutex
+
 	errCtx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
 
 	for _, coord := range testCoordinates {
@@ -413,27 +417,28 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 
 			select {
 			case <-errCtx.Done():
+				//don't compare
 				return
+			default:
+				err1 := compareCoords(coord)
+				if err1 != nil {
+					cancel()
+					errMutex.Lock()
+					err = err1
+					errMutex.Unlock() //ideally not supposed to unlock
+				}
 			}
-			err1 := compareCoords(coord)
-			if err1 != nil {
-				cancel()
-				go func() {
-					errChan <- err1
-				}()
-			}
-
 		}(coord)
 	}
 
 	wg.Wait()
 
-	close(errChan)
+	/*	close(errChan)
 
-	for err1 := range errChan {
-		err = err1 //combine errors
-		//break
-	}
-
+		for err1 := range errChan {
+			err = err1 //combine errors
+			//break
+		}
+	*/
 	return
 }
