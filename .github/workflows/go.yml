@@ -95,6 +95,7 @@ jobs:
           go-version: 1.19.4
 
       - name: Fuzz
-        run:  go test -v -fuzz  ^Fuzz -run ^$ -fuzztime=300s
+        run:  go test -v -fuzz  ^Fuzz -run ^$ flags='max_count=100,seed=0,20,20'
+
 
 
