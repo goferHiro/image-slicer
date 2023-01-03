@@ -30,77 +30,17 @@ func init() {
 
 }
 
-func TestSlicesJoins(t *testing.T) {
+func TestSlices(t *testing.T) {
 
-	images := procureImages()
-
-	t.Logf("[TEST] images %d", len(images))
-
-IMAGE:
-	if len(images) == 0 {
-		t.Logf("[TEST] no more images found")
+	if testing.Short() {
 		return
 	}
 
-	img := images[0]
-	images = images[1:]
-
-	t.Logf("[TEST] image %v ", img.Bounds())
-
-	grids := procureGrids()
-
-	for _, grid := range grids {
-		tiles := imageslicer.Slice(img, grid)
-
-		joinedImg, err := imageslicer.Join(tiles, grid)
-		if err != nil {
-			t.Errorf("[JOIN] failed due to %s", err)
-			t.SkipNow()
-		} else {
-			shapeJ := joinedImg.Bounds()
-			shapeI := img.Bounds()
-			//t.Logf("[JOIN/SPLIT] %v [ORIG] %v", shapeJ.Max, shapeI.Max)
-
-			if shapeI != shapeJ {
-				t.Log("[JOIN] pixels lost while splitting")
-			}
-			rand.Seed(time.Now().UnixNano())
-
-			testCoordinates := [][2]int{
-				{shapeI.Min.X, shapeI.Min.Y},
-			}
-			maxY := shapeJ.Max.Y
-			minY := shapeJ.Min.Y
-
-			maxX := shapeJ.Max.X //ideally should be using origImg but that will fail for edge cases for certain imgs
-			minX := shapeJ.Min.X
-
-			for i := 0; i < (maxY + maxX); i++ { //TODO : should we test all coords
-				randY := rand.Intn(maxY-minY+1) + minY
-				randX := rand.Intn(maxX-minX+1) + minX
-
-				testCoordinates = append(testCoordinates, [2]int{randX, randY})
-			}
-
-			for _, coord := range testCoordinates {
-				x := coord[0]
-				y := coord[1]
-
-				colorI := img.At(x, y)
-				colorJ := joinedImg.At(x, y)
-
-				if compareColor(colorI, colorJ) {
-					//t.Logf("coord %v", coord)
-				} else {
-					t.Errorf("failed coord %v", coord)
-				}
-			}
-
-		}
-
+	for i, img := range images {
+		t.Run(fmt.Sprintf("TESTSLICES-%d", i), func(t *testing.T) {
+			testSlice(t, img, grid)
+		})
 	}
-
-	goto IMAGE
 
 }
 
