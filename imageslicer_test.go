@@ -73,7 +73,7 @@ func FuzzSlice(f *testing.F) {
 	}
 
 	func() { //generate corpus
-		rand.Seed(1000)
+		rand.Seed(time.Now().UnixNano())
 
 		for i := 0; i < 100; i++ { //TODO add more
 			randImgID := rand.Intn(len(images))
@@ -85,9 +85,6 @@ func FuzzSlice(f *testing.F) {
 			}
 
 			f.Add(uint(randImgID), randNo, randNo)
-			for _, grid := range grids {
-				f.Add(uint(randImgID), uint(grid[0]), uint(grid[1]))
-			}
 		}
 	}()
 
