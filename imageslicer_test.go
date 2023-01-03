@@ -18,8 +18,12 @@ type unitTest struct {
 }
 
 var images = procureImages()
+var imgID = rand.Intn(len(images))
+var img = images[imgID]
 
 var grids = procureGrids()
+var gridID = rand.Intn(len(grids))
+var grid = grids[gridID]
 
 var now = time.Now()
 
@@ -98,24 +102,20 @@ IMAGE:
 }
 
 func TestSlice(t *testing.T) {
+	testSlice(t, img, grid)
+}
 
-	imgID := rand.Intn(len(images))
-	imgID = 0 //TODO temp
-	img := images[imgID]
-
-	gridID := rand.Intn(len(grids))
-	gridID = 0 //TODO temp
-	grid := grids[gridID]
+func testSlice(t *testing.T, img image.Image, grid [2]uint) {
 
 	tiles := imageslicer.Slice(img, grid)
 
 	if err := imageslicer.CheckSlice(tiles, grid); err != nil {
-		t.Errorf("[slice] failed for img-%d due to %s", imgID, err)
+		t.Errorf("[testSlice] failed for img-%d due to %s", imgID, err)
 		return
 	}
 
-	if err := ValidateSlices(img, tiles, grid); err != nil {
-		t.Errorf("[slice] %v", err)
+	if err := ValidateSlices(t, img, tiles, grid); err != nil {
+		t.Errorf("[testSlice] %v", err)
 		return
 	}
 
@@ -124,7 +124,7 @@ func TestSlice(t *testing.T) {
 func FuzzSlice(f *testing.F) {
 
 	func() { //generate corpus
-		for i := 0; i < 1; i++ {
+		for i := 0; i < 1; i++ { //TODO add more
 			randImgID := rand.Intn(len(images))
 			for _, grid := range grids {
 				f.Add(uint(randImgID), grid[0], grid[1])
@@ -133,7 +133,7 @@ func FuzzSlice(f *testing.F) {
 	}()
 
 	f.Fuzz(func(t *testing.T, imgID uint, rows uint, column uint) {
-		t.Logf("[slice] %d", imgID)
+		t.Logf("[testSlice] %d", imgID)
 
 		if int(imgID) >= len(images) {
 			t.Skipf("invalid imgID-%d", imgID)
@@ -148,22 +148,12 @@ func FuzzSlice(f *testing.F) {
 
 		grid := imageslicer.Grid{rows, column}
 
-		tiles := imageslicer.Slice(img, grid)
-
-		if err := imageslicer.CheckSlice(tiles, grid); err != nil {
-			t.Errorf("[slice] failed for img-%d due to %s", imgID, err)
-			//t.Skipf("[slice] failed for img-%d due to %s", imgID, err)
-			t.SkipNow()
-		}
-		t.Logf("[slice] %d", imgID)
+		testSlice(t, img, grid)
 	})
 
 }
 
 func BenchmarkSlice(b *testing.B) {
-
-	imgID := 0 //rand.Intn(len(images))
-	img := images[imgID]
 
 	if img == nil {
 		b.Errorf("invalid img-%d", imgID)
@@ -174,19 +164,15 @@ func BenchmarkSlice(b *testing.B) {
 	gridID := 0
 	grid := grids[gridID]
 
-	b.Logf("[testcase] img %d grid %v iter %d\n", imgID, grid, b.N)
+	b.Logf("[bTestCase] img %d grid %v iter %d\n", imgID, grid, b.N)
 
 	for i := 0; i < b.N; i++ {
 
 		b.StartTimer()
 
-		tiles := imageslicer.Slice(img, grid)
+		imageslicer.Slice(img, grid)
 
 		b.StopTimer()
-
-		if err := imageslicer.CheckSlice(tiles, grid); err != nil {
-			b.Errorf("[slice] failed for img-%d due to %s", imgID, err)
-		}
 	}
 
 }
@@ -341,7 +327,7 @@ func lsDir(dirPath string) (files []string, err error) {
 }
 
 // validate all the slices with
-func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Grid) (err error) {
+func ValidateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid imageslicer.Grid) (err error) {
 
 	joinedImg, err := imageslicer.Join(tiles, grid)
 
