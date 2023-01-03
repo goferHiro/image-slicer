@@ -14,25 +14,30 @@ import (
 	"time"
 )
 
-type unitTest struct {
-}
-
 var images = procureImages()
-var imgID = rand.Intn(len(images))
-var img = images[imgID]
-
 var grids = procureGrids()
-var gridID = rand.Intn(len(grids))
-var grid = grids[gridID]
+
+var imgID int
+var img image.Image
+
+var gridID int
+var grid [2]uint
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
+
+	imgID = rand.Intn(len(images))
+	gridID = rand.Intn(len(grids))
+
+	img = images[imgID]
+	grid = grids[gridID]
 
 }
 
 func TestSlice(t *testing.T) {
 
 	if testing.Short() {
+		t.Logf("TESTSLICES-%d_[%v]", imgID, grid)
 		testSlice(t, img, grid)
 		return
 	}
