@@ -25,7 +25,10 @@ var grids = procureGrids()
 var gridID = rand.Intn(len(grids))
 var grid = grids[gridID]
 
-var now = time.Now()
+func init() {
+	rand.Seed(time.Now().UnixNano())
+
+}
 
 func TestSlicesJoins(t *testing.T) {
 
@@ -114,7 +117,7 @@ func testSlice(t *testing.T, img image.Image, grid [2]uint) {
 		return
 	}
 
-	if err := ValidateSlices(t, img, tiles, grid); err != nil {
+	if err := validateSlices(t, img, tiles, grid); err != nil {
 		t.Errorf("[testSlice] %v", err)
 		return
 	}
@@ -327,20 +330,13 @@ func lsDir(dirPath string) (files []string, err error) {
 }
 
 // validate all the slices with
-func ValidateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid imageslicer.Grid) (err error) {
+func validateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid imageslicer.Grid) (err error) {
 
 	joinedImg, err := imageslicer.Join(tiles, grid)
 
 	if err != nil {
 		return fmt.Errorf("[ValidateSlice] %s", err)
 	}
-	shapeI := srcImg.Bounds()
-	shapeJ := joinedImg.Bounds()
-
-	if shapeI != shapeJ {
-		log.Println("[SHAPE] pixels lost after split")
-	}
-	rand.Seed(time.Now().UnixNano())
 
 	var compareCoords = func(coord [2]int) (err error) {
 		x := coord[0]
@@ -357,20 +353,22 @@ func ValidateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid 
 		return
 	}
 
-	/*
-		testCoords := make(chan [2]int,1)
-
-		testCoords <- [2]int{shapeI.Min.X, shapeI.Min.Y}*/
-
-	maxY := shapeJ.Max.Y
-	minY := shapeI.Min.Y
-
-	maxX := shapeJ.Max.X
-	minX := shapeI.Min.X
-
 	coords := make(chan [2]int, 10)
 
+	shapeI := srcImg.Bounds()
+	shapeJ := joinedImg.Bounds()
+
+	if shapeI != shapeJ {
+		t.Log("[SHAPE] pixels lost after split")
+	}
+
 	var produceCoords = func() {
+
+		maxY := shapeJ.Max.Y
+		minY := shapeI.Min.Y
+
+		maxX := shapeJ.Max.X
+		minX := shapeI.Min.X
 
 		log.Println("[produceCoord] start")
 		defer log.Println("[produceCoord] ended")
@@ -378,6 +376,8 @@ func ValidateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid 
 		defer close(coords)
 
 		if testing.Short() {
+			rand.Seed(time.Now().UnixNano())
+
 			for i := 0; i < 5000; i++ {
 
 				if err != nil {
@@ -456,6 +456,11 @@ func ValidateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid 
 			}
 		*/
 	}
+
+	/*
+		testCoords := make(chan [2]int,1)
+
+		testCoords <- [2]int{shapeI.Min.X, shapeI.Min.Y}*/
 
 	go produceCoords()
 
