@@ -73,7 +73,7 @@ func FuzzSlice(f *testing.F) {
 	}()
 
 	f.Fuzz(func(t *testing.T, imgID uint, rows uint, column uint) {
-		t.Logf("[testSlice] %d", imgID)
+		t.Logf("[fuzz] %d %d %d", imgID, rows, column)
 
 		if int(imgID) >= len(images) {
 			t.Skipf("invalid imgID-%d", imgID)
