@@ -82,7 +82,7 @@ func FuzzSlice(f *testing.F) {
 		rand.Seed(time.Now().UnixNano())
 
 		for i := 0; i < 100; i++ { //TODO add more
-			randImgID := rand.Intn(len(images))
+			//randImgID := rand.Intn(len(images))
 			randNo := uint(rand.Intn(250))
 
 			if invalidGrid(randNo, randNo) {
@@ -90,10 +90,10 @@ func FuzzSlice(f *testing.F) {
 				continue
 			}
 
-			f.Add(uint(randImgID), randNo, randNo)
+			f.Add(uint(imgID), randNo, randNo)
 
 			if testing.Short() {
-				break
+				break //short circuiting
 			}
 
 		}
