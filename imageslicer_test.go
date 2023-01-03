@@ -38,9 +38,12 @@ func TestSlice(t *testing.T) {
 	}
 
 	for i, img := range images {
-		t.Run(fmt.Sprintf("TESTSLICES-%d", i), func(t *testing.T) {
-			testSlice(t, img, grid)
-		})
+
+		for _, grid := range grids {
+			t.Run(fmt.Sprintf("TESTSLICES-%d_[%v]", i, grid), func(t *testing.T) {
+				testSlice(t, img, grid)
+			})
+		}
 	}
 
 }
