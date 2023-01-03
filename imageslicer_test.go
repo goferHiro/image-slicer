@@ -375,7 +375,6 @@ func ValidateSlices(srcImg image.Image, tiles []image.Image, grid imageslicer.Gr
 		for x := minX; x < maxX; x++ {
 			for y := 0; y < maxY; y++ {
 				testCoordinates = append(testCoordinates, [2]int{x, y})
-				log.Println(testCoordinates)
 			}
 		}
 
