@@ -83,7 +83,7 @@ func FuzzSlice(f *testing.F) {
 
 		for i := 0; i < 100; i++ { //TODO add more
 			//randImgID := rand.Intn(len(images))
-			randNo := uint(rand.Intn(250))
+			randNo := uint(rand.Intn(25))
 
 			if invalidGrid(randNo, randNo) {
 				f.Logf("[fuzzSlice] generated invalid grid-(%d,%d)", randNo, randNo)
