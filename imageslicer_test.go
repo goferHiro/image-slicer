@@ -80,12 +80,6 @@ func testSlice(t *testing.T, img image.Image, grid [2]uint) {
 
 func FuzzSlice(f *testing.F) {
 
-	var invalidGrid = func(rows, cols uint) (invalid bool) {
-		invalid = rows == 0 || cols == 0
-
-		return
-	}
-
 	func() { //generate corpus
 
 		seed := time.Now().UnixNano()
@@ -93,14 +87,9 @@ func FuzzSlice(f *testing.F) {
 
 		f.Logf("[seed] %v", seed)
 
-		for i := 0; i < 100; i++ { //TODO add more
+		for i := 0; i < 500; i++ { //TODO add more
 			//randImgID := rand.Intn(len(images))
-			randNo := uint(rand.Intn(500)) //TODO consider using no squara grids to test the strength
-
-			if invalidGrid(randNo, randNo) {
-				f.Logf("[fuzzSlice] generated invalid grid-(%d,%d)", randNo, randNo)
-				continue
-			}
+			randNo := uint(rand.Intn(500)) + 5 //TODO consider using non squara grids to test the strength
 
 			f.Add(uint(imgID), randNo, randNo)
 
