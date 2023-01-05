@@ -95,7 +95,7 @@ func FuzzSlice(f *testing.F) {
 
 		for i := 0; i < 100; i++ { //TODO add more
 			//randImgID := rand.Intn(len(images))
-			randNo := uint(rand.Intn(500))
+			randNo := uint(rand.Intn(500)) //TODO consider using no squara grids to test the strength
 
 			if invalidGrid(randNo, randNo) {
 				f.Logf("[fuzzSlice] generated invalid grid-(%d,%d)", randNo, randNo)
