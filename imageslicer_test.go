@@ -177,7 +177,7 @@ var procureImages = func() (imgs []image.Image) {
 
 	var wg sync.WaitGroup
 
-	var mw sync.Mutex
+	var mw sync.Mutex //TODO Add test case names for images
 
 	urls := []string{
 		"https://static.wikia.nocookie.net/big-hero-6-fanon/images/0/0f/Hiro.jpg/revision/latest?cb=20180511180437",
