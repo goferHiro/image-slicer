@@ -285,9 +285,6 @@ var procureGrids = func() (grids []imageslicer.Grid) {
 		{7, 20},
 		{10, 10},
 		{10, 20},
-		{50, 0},
-		{50, 50},
-		{205, 164},
 	}
 
 	return

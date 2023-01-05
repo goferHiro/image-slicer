@@ -39,6 +39,7 @@ jobs:
         #
         #          (cd ./${dir} && go get -u && go mod tidy) # -compat=1.19
                 done
+
   test:
     runs-on: ubuntu-latest
 
