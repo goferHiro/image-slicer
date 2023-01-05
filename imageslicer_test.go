@@ -268,6 +268,7 @@ var procureImages = func() (imgs []image.Image) {
 var procureGrids = func() (grids []imageslicer.Grid) {
 
 	grids = []imageslicer.Grid{
+		{0, 0},
 		{1, 0},
 		{1, 1},
 		{1, 2},
@@ -419,10 +420,16 @@ func validateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid 
 				default:
 					err1 := compareCoords(coord)
 					if err1 != nil {
-						cancel()
-						errMutex.Lock()
-						err = err1
-						errMutex.Unlock()
+
+						if errMutex.TryLock() {
+							errMutex.Lock()
+							cancel()
+							err = err1
+						} else {
+							t.Logf("[consumeCord] err raised already")
+						}
+
+						//errMutex.Unlock()
 					}
 				}
 			}(coord)
