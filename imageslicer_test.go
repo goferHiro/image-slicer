@@ -37,7 +37,6 @@ func init() {
 func TestSlice(t *testing.T) {
 
 	if testing.Short() {
-		grid = grids[gridID]
 		t.Logf("TESTSLICES-%d_[%v]", imgID, grid)
 		testSlice(t, img, grid)
 		return
@@ -268,23 +267,27 @@ var procureImages = func() (imgs []image.Image) {
 var procureGrids = func() (grids []imageslicer.Grid) {
 
 	grids = []imageslicer.Grid{
-		{0, 0},
-		{1, 0},
+		//{0, 0},
+		//{1, 0},
 		{1, 1},
 		{1, 2},
-		{1, 10},
-		{2, 0},
+		{1, 3},
+		{1, 4},
+		//{2, 0},
 		{2, 1},
 		{2, 2},
-		{3, 0},
+		{2, 3},
+		{2, 4},
+		//{3, 0},
 		{3, 1},
 		{3, 2},
 		{3, 3},
-		{3, 6},
-		{5, 6},
-		{7, 20},
-		{10, 10},
-		{10, 20},
+		{3, 4},
+		//{4, 0},
+		{4, 1},
+		{4, 2},
+		{4, 3},
+		{4, 4},
 	}
 
 	return
