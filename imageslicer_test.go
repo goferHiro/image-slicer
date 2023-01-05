@@ -58,6 +58,15 @@ func testSlice(t *testing.T, img image.Image, grid [2]uint) {
 
 	tiles := imageslicer.Slice(img, grid)
 
+	expectedNoOfTiles := grid[0] * grid[1]
+
+	if expectedNoOfTiles == 0 {
+		if len(tiles) > 0 {
+			t.Errorf("[testSlice] expected 0 tiles got %d", len(tiles))
+		}
+		return
+	}
+
 	if err := imageslicer.CheckSlice(tiles, grid); err != nil {
 		t.Errorf("[testSlice] failed for img-%d due to %s", imgID, err)
 		return
@@ -217,8 +226,8 @@ var procureImages = func() (imgs []image.Image) {
 			img, err := imageslicer.GetImageFromBase64(base64str)
 			if err == nil {
 				mw.Lock()
-				defer mw.Unlock()
 				imgs = append(imgs, img)
+				mw.Unlock()
 			} else {
 				fmt.Println(err)
 				return
@@ -244,9 +253,9 @@ var procureImages = func() (imgs []image.Image) {
 				}
 				//t.Logf("imgFile", imgFile)
 				mw.Lock()
-				defer mw.Unlock()
-
 				imgs = append(imgs, img)
+				mw.Unlock()
+
 			}(imgFile)
 		}
 	}
@@ -259,14 +268,14 @@ var procureImages = func() (imgs []image.Image) {
 var procureGrids = func() (grids []imageslicer.Grid) {
 
 	grids = []imageslicer.Grid{
-		//{205, 164},
-		{50, 50},
-		//{1, 0},
+		{1, 0},
 		{1, 1},
 		{1, 2},
 		{1, 10},
-		//{2,0},
+		{2, 0},
 		{2, 1},
+		{2, 2},
+		{3, 0},
 		{3, 1},
 		{3, 2},
 		{3, 3},
@@ -275,6 +284,9 @@ var procureGrids = func() (grids []imageslicer.Grid) {
 		{7, 20},
 		{10, 10},
 		{10, 20},
+		{50, 0},
+		{50, 50},
+		{205, 164},
 	}
 
 	return
