@@ -208,7 +208,7 @@ img := imageslicer.GetImageFromUrl(imgUrl)
 
 - Use the latest release.
 - ```Slice(img,grid)```
-    - ensure grid[0]*grid[1]>0.
+    - ensure area of grid is greater than 0.
     - ensure img is not nil.
     - its best if the img is downsized to the area of grid to avoid pixel losses. //Will bring support in future releases
 - ```Join(tiles,grid)```
