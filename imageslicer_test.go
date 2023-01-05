@@ -37,7 +37,7 @@ func init() {
 func TestSlice(t *testing.T) {
 
 	if testing.Short() {
-		grid = [2]uint{203, 203}
+		grid = grids[gridID]
 		t.Logf("TESTSLICES-%d_[%v]", imgID, grid)
 		testSlice(t, img, grid)
 		return
@@ -87,7 +87,7 @@ func FuzzSlice(f *testing.F) {
 
 		for i := 0; i < 10000; i++ { //TODO add more
 			//randImgID := rand.Intn(len(images))
-			randNo := uint(rand.Intn(25))
+			randNo := uint(rand.Intn(200))
 
 			if invalidGrid(randNo, randNo) {
 				f.Logf("[fuzzSlice] generated invalid grid-(%d,%d)", randNo, randNo)
