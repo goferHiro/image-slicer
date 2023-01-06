@@ -36,6 +36,8 @@ func init() {
 
 func TestSlice(t *testing.T) {
 
+	t.Parallel() //FIXME might cause race cuz of the global vars
+
 	if testing.Short() {
 		t.Logf("TESTSLICES-%d_[%v]", imgID, grid)
 		testSlice(t, img, grid)
@@ -45,6 +47,7 @@ func TestSlice(t *testing.T) {
 	for i, _ := range images {
 		for g, _ := range grids {
 			t.Run(fmt.Sprintf("TESTSLICES-%d_[%v]", i, grid), func(t *testing.T) {
+				t.Parallel()
 				testSlice(t, images[i], grids[g])
 			})
 		}
@@ -54,8 +57,6 @@ func TestSlice(t *testing.T) {
 }
 
 func testSlice(t *testing.T, img image.Image, grid [2]uint) {
-
-	t.Parallel()
 
 	tiles := imageslicer.Slice(img, grid)
 
@@ -105,6 +106,8 @@ func FuzzSlice(f *testing.F) {
 	f.Fuzz(func(t *testing.T, imgID uint, rows uint, column uint) {
 
 		t.Run(fmt.Sprintf("[%d,%d] %d", rows, column, imgID), func(t *testing.T) {
+
+			t.Parallel()
 
 			if int(imgID) >= len(images) {
 				t.Skipf("invalid imgID-%d", imgID)
