@@ -91,7 +91,7 @@ func FuzzSlice(f *testing.F) {
 		f.Logf("[seed] %v", seed)
 
 		for i := 0; i < 500; i++ { //TODO add more
-			//randImgID := rand.Intn(len(images))
+			imgID := rand.Intn(len(images))
 			randNo := uint(rand.Intn(500)) + 5 //TODO consider using non squara grids to test the strength
 
 			f.Add(uint(imgID), randNo, randNo)
