@@ -107,8 +107,6 @@ func FuzzSlice(f *testing.F) {
 
 		t.Run(fmt.Sprintf("[%d,%d] %d", rows, column, imgID), func(t *testing.T) {
 
-			t.Parallel()
-
 			if int(imgID) >= len(images) {
 				t.Skipf("invalid imgID-%d", imgID)
 			}
