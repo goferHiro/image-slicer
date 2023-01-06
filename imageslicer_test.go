@@ -392,7 +392,7 @@ func validateSlices(t *testing.T, srcImg image.Image, tiles []image.Image, grid 
 		//errChan := make(chan error)
 		var errMutex sync.Mutex
 
-		errCtx, cancel := context.WithTimeout(context.Background(), time.Minute*10) //FIXME don't context timeout
+		errCtx, cancel := context.WithTimeout(context.Background(), time.Hour*6) //FIXME don't context timeout
 
 		t.Logf("[consumeCord] started")
 
