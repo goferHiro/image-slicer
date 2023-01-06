@@ -42,11 +42,10 @@ func TestSlice(t *testing.T) {
 		return
 	}
 
-	for i, img := range images {
-
-		for _, grid := range grids {
+	for i, _ := range images {
+		for g, _ := range grids {
 			t.Run(fmt.Sprintf("TESTSLICES-%d_[%v]", i, grid), func(t *testing.T) {
-				testSlice(t, img, grid)
+				testSlice(t, images[i], grids[g])
 			})
 		}
 		break //FIXME : remove when done
