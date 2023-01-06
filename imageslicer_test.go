@@ -55,6 +55,8 @@ func TestSlice(t *testing.T) {
 
 func testSlice(t *testing.T, img image.Image, grid [2]uint) {
 
+	t.Parallel()
+
 	tiles := imageslicer.Slice(img, grid)
 
 	expectedNoOfTiles := grid[0] * grid[1]
